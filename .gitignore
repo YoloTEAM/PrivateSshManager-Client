@@ -1,0 +1,12 @@
+# Specifies intentionally untracked files to ignore when using Git
+# http://git-scm.com/docs/gitignore
+
+Bitvise/
+SaveSsh/
+BackUp/
+
+icon.ico
+config.ini
+country.iso
+autoBvSsh.exe
+SSHPrivateServer-ClienChanger.exe
