@@ -4,22 +4,22 @@
 ; Description ...: Connect to PrivateSSHServer, pull SSH list via REST_API to use with BitviseSSH
 ; Author(s) .....: WormIt, KienNguyen
 ; Power by ......: YoloTEAM
-; Github ........: http://YoloTEAM.github.io/PrivateSSHManager
+; Github ........: http://YoloTEAM.github.io/PrivateSsHManager-Server
 ; ===============================================================================================================================
 
 #Region ;**** Directives created by AutoIt3Wrapper_GUI ****
 #AutoIt3Wrapper_Icon=icon.ico
-#AutoIt3Wrapper_Outfile=SSHPrivateServer-ClienChanger.exe
+#AutoIt3Wrapper_Outfile=PrivateSshManager-ClientChanger.exe
 #AutoIt3Wrapper_UseUpx=y
-#AutoIt3Wrapper_Res_Description=SSHPrivateServer-ClienChanger
+#AutoIt3Wrapper_Res_Description=PrivateSshManager-ClientChanger
 #AutoIt3Wrapper_Res_Fileversion=1.0.0.0
 #AutoIt3Wrapper_Res_ProductVersion=1.0.0.0
 #AutoIt3Wrapper_Res_LegalCopyright=YoloTEAM @ 2016
-#AutoIt3Wrapper_Res_Field=ProductName|SSHPrivateServer-ClienChanger
+#AutoIt3Wrapper_Res_Field=ProductName|PrivateSshManager-ClientChanger
 #EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
 
 ; Global Config-section
-Global $ServerHost = "localhost", $ServerPort = 8080, $Username, $Password, $countryISO, $SocksPerRq
+Global $sServer, $sPort, $Username, $Password, $countryISO, $SocksPerRq
 Global $BvSsh_pID, $BvSsh_path, $BvSsh_forwardPort, $BvSsh_timeOut, $BvSsh_hideAll
 Global $configFile = @ScriptDir & '\config.ini', $GlobalJWT
 Global $tempSsh, $stop_wait = False
@@ -44,7 +44,7 @@ DirCreate(@ScriptDir & "\SaveSsh")
 DirCreate(@ScriptDir & "\SaveSsh\unUSED")
 
 #Region #MainGUI
-Global $hMemberAreaGUI = GUICreate("SSH Private Client - Member Area", 315, 135, -1, -1)
+Global $hMemberAreaGUI = GUICreate("PrivateSshManager - Member Area", 315, 135, -1, -1)
 GUISetBkColor(0x008080)
 Global $hLCountry = GUICtrlCreateLabel("Country:    " & $countryISO, 25, 20, 170, 15)
 GUICtrlSetFont(-1, 8.5, 800, 0, "Tahoma", 5)
@@ -136,12 +136,12 @@ While 1
 WEnd
 
 Func _loadingConfig()
-	$ServerHost = IniRead($configFile, "SSHPrivateServer", "Server", "localhost")
-	$ServerPort = IniRead($configFile, "SSHPrivateServer", "ServerPort", 8080)
-	$Username = IniRead($configFile, "SSHPrivateServer", "Username", "")
-	$Password = IniRead($configFile, "SSHPrivateServer", "Password", "")
-	$countryISO = IniRead($configFile, "SSHPrivateServer", "CountryISO", "")
-	$SocksPerRq = IniRead($configFile, "SSHPrivateServer", "SocksPerRequest", 20)
+	$sServer = IniRead($configFile, "SshPrivateServer", "Server", "localhost")
+	$sPort = IniRead($configFile, "SshPrivateServer", "Port", 8080)
+	$Username = IniRead($configFile, "SshPrivateServer", "Username", "")
+	$Password = IniRead($configFile, "SshPrivateServer", "Password", "")
+	$countryISO = IniRead($configFile, "SshPrivateServer", "CountryISO", "")
+	$SocksPerRq = IniRead($configFile, "SshPrivateServer", "SocksPerRequest", 20)
 
 	$BvSsh_path = IniRead($configFile, "BvSshConfig", "BvSshPath", @ScriptDir & "\Bitvise")
 	If StringLeft($BvSsh_path, 1) == '\' Then $BvSsh_path = @ScriptDir & $BvSsh_path
@@ -156,16 +156,18 @@ Func _loadingConfig()
 EndFunc   ;==>_loadingConfig
 
 Func _getJWT()
+	ConsoleWrite('--> Login to ' & $sServer & ":" & $sPort & @CRLF)
 	Local $dataLogin = REST_login($Username, $Password)
-	If Not $dataLogin Then
+	If Not StringInStr($dataLogin, "success") Then
 		SplashOff()
-		MsgBox(48, "Server is Offline", "(" & $ServerHost & ":" & $ServerPort & ")" & @CRLF & "[" & $dataLogin & "]" & @CRLF)
+		MsgBox(48, "Server is Offline", "(" & $sServer & ":" & $sPort & ")" & @CRLF& "Can't connect.")
 		Exit
 	EndIf
 
 	SplashOff()
 
 	Local $regJWT = StringRegExp($dataLogin, '"success":(.*?),".*":"(.*?)"', 3)
+
 	If $regJWT[0] == 'true' Then
 		ConsoleWrite("+> Login successfully!" & @CRLF)
 		$GlobalJWT = $regJWT[1]

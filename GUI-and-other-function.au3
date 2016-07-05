@@ -13,15 +13,17 @@ Func _loginArea()
 	Local $hCRemember = GUICtrlCreateCheckbox("Remember", 93, 65, 69, 15)
 	If $Username And $Password Then GUICtrlSetState(-1, 1)
 	GUICtrlSetFont(-1, 8.5, 400, 0, "Tahoma", 5)
-	Local $hBLogin = GUICtrlCreateButton("Login", 90, 90, 95, 25)
+	Local $hBLogin = GUICtrlCreateButton("Login", 50, 90, 70, 25)
 	GUICtrlSetFont(-1, 9, 400, 0, "Tahoma", 5)
 	GUICtrlCreateGroup(" Infomation ", 1, 125, 248, 65)
 	GUICtrlSetFont(-1, 8.5, 400, 0, "Tahoma", 5)
 	GUICtrlCreateLabel("SSH Private Server by YoloTEAM @ 2016", 27, 145, 200, 14)
 	GUICtrlSetFont(-1, 8.5, 400, 0, "Tahoma", 5)
-	Local $hLink = GUICtrlCreateLabel("http://YoloTEAM.github.io/PrivateSSHManager", 13, 165, 225, 15)
+	Local $hLink = GUICtrlCreateLabel("http://YoloTEAM.github.io/PrivateSshManager-Server", 13, 165, 225, 15)
 	GUICtrlSetColor(-1, 0x0080FF)
 	GUICtrlSetFont(-1, 8.5, 400, 4, "Tahoma", 5)
+	Local $hBSignUp = GUICtrlCreateButton("SignUp", 130, 90, 70, 25)
+	GUICtrlSetFont(-1, 9, 400, 0, "Tahoma", 5)
 	GUISetState(@SW_SHOW, $hLoginGUI)
 	WinSetOnTop($hLoginGUI, '', 1)
 
@@ -30,7 +32,7 @@ Func _loginArea()
 			Case -3
 				Exit
 			Case $hLink
-				ShellExecute("http://YoloTEAM.github.io/PrivateSSHManager")
+				ShellExecute("http://YoloTEAM.github.io/PrivateSshManager-Server")
 			Case $hBLogin
 				GUICtrlSetState($hBLogin, 128)
 				$Username = GUICtrlRead($hIUsername)
@@ -40,11 +42,11 @@ Func _loginArea()
 					GUISetState(@SW_HIDE, $hLoginGUI)
 
 					If _IsChecked($hCRemember) Then
-						IniWrite($configFile, "SSHPrivateServer", "Username", $Username)
-						IniWrite($configFile, "SSHPrivateServer", "Password", $Password)
+						IniWrite($configFile, "SshPrivateServer", "Username", $Username)
+						IniWrite($configFile, "SshPrivateServer", "Password", $Password)
 					Else
-						IniWrite($configFile, "SSHPrivateServer", "Username", "")
-						IniWrite($configFile, "SSHPrivateServer", "Password", "")
+						IniWrite($configFile, "SshPrivateServer", "Username", "")
+						IniWrite($configFile, "SshPrivateServer", "Password", "")
 					EndIf
 
 					GUICtrlSetState($hBLogin, 64)
@@ -54,6 +56,12 @@ Func _loginArea()
 					MsgBox(0, "Error", $getJWT, 0, $hLoginGUI)
 				EndIf
 				GUICtrlSetState($hBLogin, 64)
+			Case $hBSignUp
+				If $sPort < 1 Then
+					ShellExecute("http://" & $sServer & "/SignUp/")
+				Else
+					ShellExecute("http://" & $sServer & ":" & $sPort & "/SignUp/")
+				EndIf
 		EndSwitch
 	WEnd
 EndFunc   ;==>_loginArea
@@ -94,7 +102,7 @@ Func _changeSsh()
 				GUICtrlSetData($hLStatus, ">> Next Ssh ...")
 				FileWrite(@ScriptDir & '\SaveSsh\die.txt', $Get_tempSsh & @CRLF)
 			Else
-				GUICtrlSetData($hLStatus, ">> Stoped . READY .")
+				GUICtrlSetData($hLStatus, ">> READY .")
 			EndIf
 		EndIf
 
@@ -108,25 +116,24 @@ Func _changeSsh()
 EndFunc   ;==>_changeSsh
 
 Func _selectCountry()
-	Local $hSelectCountryGUI = GUICreate("Window", 375, 220, -1, -1)
+	Local $hSelectCountryGUI = GUICreate("Select Country", 375, 600, -1, -1)
 	GUISetBkColor(0x008080)
-	Local $hCountryListView = GUICtrlCreateListView("N.|Country|ISO|Socks", 0, 0, 375, 180)
+	Local $hCountryListView = GUICtrlCreateListView("N.|Country|ISO|Socks", 0, 0, 375, 560)
 	ControlDisable($hSelectCountryGUI, "", HWnd(_GUICtrlListView_GetHeader($hCountryListView)))
 
-	GUICtrlCreateLabel("Number of Socks / Request:", 10, 193, 160, 15)
+	GUICtrlCreateLabel("Number of Socks / Request:", 11, 574, 160, 15)
 	GUICtrlSetColor(-1, 0xFFFFFF)
 	GUICtrlSetFont(-1, 8.5, 800, 0, "Tahoma", 5)
-	Local $hISpR = GUICtrlCreateInput($SocksPerRq, 175, 190, 40, 20)
+	Local $hISpR = GUICtrlCreateInput($SocksPerRq, 176, 571, 40, 20)
 	GUICtrlSetFont(-1, 8.5, 400, 0, "Tahoma", 5)
-	Local $hBSave = GUICtrlCreateButton("Save", 230, 185, 80, 30)
+	Local $hBSave = GUICtrlCreateButton("Save", 231, 566, 80, 30)
 	GUICtrlSetFont(-1, 8.5, 800, 0, "Tahoma", 5)
-	Local $hBReload = GUICtrlCreateButton("Reload", 315, 185, 50, 30)
+	Local $hBReload = GUICtrlCreateButton("Reload", 316, 566, 50, 30)
 	GUICtrlSetFont(-1, 8.5, 400, 0, "Tahoma", 5)
-	GUICtrlSetState(-1, 128)
+	GUICtrlSetState($hBReload, 128)
+	GUISetState(@SW_SHOW, $hSelectCountryGUI)
 
 	_countryReload($hCountryListView)
-
-	GUISetState(@SW_SHOW, $hSelectCountryGUI)
 
 	While 1
 		Switch GUIGetMsg()
@@ -146,29 +153,35 @@ Func _selectCountry()
 					EndIf
 
 					$countryISO = $tempCountry
-					IniWrite($configFile, "SSHPrivateServer", "CountryISO", $countryISO)
+					IniWrite($configFile, "SshPrivateServer", "CountryISO", $countryISO)
 
 					$tempSsh = 0
 				EndIf
 
 				$SocksPerRq = GUICtrlRead($hISpR)
-				IniWrite($configFile, "SSHPrivateServer", "SocksPerRequest", $SocksPerRq)
+				IniWrite($configFile, "SshPrivateServer", "SocksPerRequest", $SocksPerRq)
 
 				GUICtrlSetData($hLCountry, "Country:    " & _GUICtrlListView_GetItemText($hCountryListView, $iSelect[1], 1))
 
 				GUIDelete($hSelectCountryGUI)
 				ExitLoop
 			Case $hBReload
+				GUICtrlSetState($hBReload, 128)
+				GUICtrlSetState($hBSave, 128)
 				_countryReload($hCountryListView)
+				GUICtrlSetState($hBSave, 64)
+				GUICtrlSetState($hBReload, 64)
 		EndSwitch
 	WEnd
 EndFunc   ;==>_selectCountry
 
 Func _countryReload($hWnd)
 	_GUICtrlListView_DeleteAllItems($hWnd)
-
-	For $i = 1 To _FileCountLines(@ScriptDir & '\country.iso')
-		GUICtrlCreateListViewItem($i & "|" & FileReadLine(@ScriptDir & '\country.iso', $i), $hWnd)
+	Local $aCoumtryISO[0][0]
+	_FileReadToArray(@ScriptDir & '\country.iso', $aCoumtryISO, Default, "|")
+	For $i = 1 To $aCoumtryISO[0][0]
+;~ 		GUICtrlCreateListViewItem($i & "|" & $aCoumtryISO[$i][0] & "|" & $aCoumtryISO[$i][1] & "|" & REST_getTotalSocksUnUsed($aCoumtryISO[$i][1], $GlobalJWT), $hWnd)
+		GUICtrlCreateListViewItem($i & "|" & $aCoumtryISO[$i][0] & "|" & $aCoumtryISO[$i][1] & "|" & 0, $hWnd)
 	Next
 
 	_ListviewSetWidth($hWnd)
